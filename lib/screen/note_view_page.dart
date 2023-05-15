@@ -38,7 +38,7 @@ class _NoteViewPageState extends State<NoteViewPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('노트 삭제'),
+          title: Text('노트 삭제123'),
           content: Text('노트를 삭제 할까요?'),
           actions: [
             TextButton(
