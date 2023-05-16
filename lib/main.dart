@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memo_app/screen/note_view_page.dart';
 import 'screen/note_edit_page.dart';
 import 'screen/note_list_page.dart';
 
@@ -16,7 +17,15 @@ class MyApp extends StatelessWidget {
       initialRoute: NoteListPage.routeName,
       routes: {
         NoteListPage.routeName: (context) => const NoteListPage(),
-        NoteEditPage.routeName: (context) => const NoteEditPage(),
+        NoteEditPage.routeName: (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          final index = args != null  ? args  as int : null;
+          return NoteEditPage(index: index,);
+        },
+        NoteViewPage.routeName: (context) {
+          final index = ModalRoute.of(context)!.settings.arguments as int;
+          return NoteViewPage(index: index);
+        },
       },
       title: 'Flutter Demo',
       theme: ThemeData(

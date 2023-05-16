@@ -4,8 +4,9 @@ import 'package:memo_app/providers.dart';
 import '../data/note.dart';
 
 class NoteEditPage extends StatefulWidget {
-  const NoteEditPage({Key? key}) : super(key: key);
+  const NoteEditPage({Key? key, this.index}) : super(key: key);
   static const routeName = "/edit";
+  final int? index;
 
   @override
   State<NoteEditPage> createState() => _NoteEditPageState();
@@ -15,6 +16,24 @@ class _NoteEditPageState extends State<NoteEditPage> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
   Color memoColor = Note.colorDefault;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final note = Note(
+      contentController.text,
+      title: titleController.text,
+      color: memoColor,
+    );
+
+    final noteIndex = widget.index;
+    if(noteIndex != null) {
+      noteManager().updateNote(noteIndex, note);
+    } else {
+      noteManager().addNote(note);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +159,7 @@ class _NoteEditPageState extends State<NoteEditPage> {
     if (contentController.text.isNotEmpty) {
       noteManager().addNote(Note(contentController.text,
           title: titleController.text, color: memoColor));
+      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('내용을 입력하세요.'),

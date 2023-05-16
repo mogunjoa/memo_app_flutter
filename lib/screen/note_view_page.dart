@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:memo_app/data/note_manager.dart';
 import 'package:memo_app/screen/note_edit_page.dart';
 
+import '../providers.dart';
+
 class NoteViewPage extends StatefulWidget {
   const NoteViewPage({Key? key, required this.index}) : super(key: key);
   static const routeName = "/view";
@@ -19,6 +21,21 @@ class _NoteViewPageState extends State<NoteViewPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(note.title.isEmpty? '(제목없음)': note.title),
+        actions: [
+          IconButton(onPressed: ()=>{
+            _edit(widget.index)
+          }, icon: Icon(Icons.edit), tooltip: '편집',),
+          IconButton(onPressed: ()=>{
+            _confirmDelete(widget.index)
+          }, icon: Icon(Icons.delete), tooltip: '삭제',),
+        ],
+      ),
+      body: SizedBox.expand(
+        child: SingleChildScrollView(
+          child: Text(
+            note.body,
+          ),
+        ),
       ),
     );
   }
@@ -26,9 +43,7 @@ class _NoteViewPageState extends State<NoteViewPage> {
   void _edit(int index) {
     Navigator.pushNamed(context, NoteEditPage.routeName, arguments: index).then(
         (_) {
-          setState(() {
-
-          });
+          setState(() {});
         }
     );
   }
@@ -38,7 +53,7 @@ class _NoteViewPageState extends State<NoteViewPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('노트 삭제123'),
+          title: Text('노트 삭제'),
           content: Text('노트를 삭제 할까요?'),
           actions: [
             TextButton(
@@ -49,7 +64,7 @@ class _NoteViewPageState extends State<NoteViewPage> {
             ),
             TextButton(
               onPressed: () {
-                // noteManager().deleteNote(index);
+                noteManager().deleteNote(index);
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
               child: Text('예'),

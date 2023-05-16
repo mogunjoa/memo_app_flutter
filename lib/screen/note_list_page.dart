@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:memo_app/providers.dart';
+import 'package:memo_app/screen/note_view_page.dart';
 import '../data/note.dart';
+import 'note_edit_page.dart';
 
 class NoteListPage extends StatefulWidget {
   const NoteListPage({Key? key}) : super(key: key);
@@ -28,6 +30,17 @@ class _NoteListPageState extends State<NoteListPage> {
           vertical: 6,
         ),
         children: _buildCards(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, NoteEditPage.routeName).then(
+                  (_) {
+                setState(() {});
+              }
+          );
+        },
+        child: Icon(Icons.add),
+        tooltip: '새 노트',
       ),
     );
   }
