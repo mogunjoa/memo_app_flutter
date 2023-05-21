@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:memo_app/providers.dart';
+
 import '../data/note.dart';
+import '../providers.dart';
 import 'note_edit_page.dart';
 import 'note_view_page.dart';
 
 class NoteListPage extends StatefulWidget {
   const NoteListPage({Key? key}) : super(key: key);
-  static const routeName = "/";
+
+  static const routeName = '/';
 
   @override
   State<NoteListPage> createState() => _NoteListPageState();
@@ -17,45 +19,58 @@ class _NoteListPageState extends State<NoteListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('딘등오의 메모'),
         backgroundColor: Colors.blue,
-        title: const Text('딘등오의 메모장'),
       ),
-      body: GridView(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 1,
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 6,
-        ),
-        children: _buildCards(),
+      body: FutureBuilder<List<Note>>(
+          future: noteManager().listNotes(),
+          builder: (context, snapshot) {
+            if(snapshot.connectionState == ConnectionState.waiting){
+              return const Center(child: CircularProgressIndicator(),);
+            }
+            if(snapshot.hasError){
+              return Scaffold(
+                appBar: AppBar(),
+                body: const Center(
+                  child: Text('오류가 발생했습니다.'),
+                ),
+              );
+            }
+            final notes = snapshot.requireData;
+            return GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 1,
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 16,
+              ),
+              itemCount: notes.length,
+              itemBuilder: (BuildContext context, int index) => _buildCard(notes[index]),
+            );
+          }
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: '새 노트',
         onPressed: () {
           Navigator.pushNamed(context, NoteEditPage.routeName).then((_) {
             setState(() {});
           });
         },
-        child: Icon(Icons.add),
-        tooltip: '새 노트',
+        child: const Icon(Icons.add),
       ),
     );
   }
 
-  List<Widget> _buildCards() {
-    final notes = noteManager().listNotes();
-    return List.generate(
-        notes.length, (index) => _buildCard(index, notes[index]));
-  }
 
-  Widget _buildCard(int index,Note note) {
+
+  Widget _buildCard(Note note) {
     return InkWell(
-      onTap: (){
-        Navigator.pushNamed(context, NoteViewPage.routeName, arguments: index).then((_){
-          setState(() {
-
-          });
+      onTap: () {
+        Navigator.pushNamed(context, NoteViewPage.routeName, arguments: note.id)
+            .then((_) {
+          setState(() {});
         });
       },
       child: Card(

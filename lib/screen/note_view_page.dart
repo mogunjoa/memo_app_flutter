@@ -1,51 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:memo_app/data/note_manager.dart';
-import 'package:memo_app/screen/note_edit_page.dart';
 
+import '../data/note.dart';
 import '../providers.dart';
+import 'note_edit_page.dart';
 
 class NoteViewPage extends StatefulWidget {
-  const NoteViewPage({Key? key, required this.index}) : super(key: key);
-  static const routeName = "/view";
-  final int index;
+  const NoteViewPage({Key? key, required this.id}) : super(key: key);
+
+  static const routeName = '/view';
+
+  final int id;
+
 
   @override
   State<NoteViewPage> createState() => _NoteViewPageState();
 }
 
 class _NoteViewPageState extends State<NoteViewPage> {
-
   @override
   Widget build(BuildContext context) {
-    final note = NoteManager().getNote(widget.index);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(note.title.isEmpty? '(제목없음)': note.title),
-        actions: [
-          IconButton(onPressed: ()=>{
-            _edit(widget.index)
-          }, icon: Icon(Icons.edit), tooltip: '편집',),
-          IconButton(onPressed: ()=>{
-            _confirmDelete(widget.index)
-          }, icon: Icon(Icons.delete), tooltip: '삭제',),
-        ],
-      ),
-      body: SizedBox.expand(
-        child: SingleChildScrollView(
-          child: Text(
-            note.body,
-          ),
-        ),
-      ),
+    return FutureBuilder<Note>(
+        future: noteManager().getNote(widget.id),
+        builder: (context, snapshot) {
+          if(snapshot.connectionState == ConnectionState.waiting){
+            return const Center(child: CircularProgressIndicator(),);
+          }
+          if(snapshot.hasError){
+            return Scaffold(
+              appBar: AppBar(),
+              body: const Center(
+                child: Text('오류가 발생했습니다.'),
+              ),
+            );
+          }
+          final note = snapshot.requireData;
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(note.title.isEmpty ? '(제목없음)' : note.title),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    _edit(widget.id);
+                  },
+                  icon: const Icon(Icons.edit),
+                  tooltip: '편집',
+                ),
+                IconButton(
+                  onPressed: () {
+                    _confirmDelete(widget.id);
+                  },
+                  icon: const Icon(Icons.delete),
+                  tooltip: '삭제',
+                ),
+              ],
+            ),
+            body: SizedBox.expand(
+              child: Container(
+                color: note.color,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  child: Text(note.body),
+                ),
+              ),
+            ),
+          );
+        }
     );
   }
 
   void _edit(int index) {
-    Navigator.pushNamed(context, NoteEditPage.routeName, arguments: index).then(
-        (_) {
-          setState(() {});
-        }
-    );
+    Navigator.pushNamed(
+      context,
+      NoteEditPage.routeName,
+      arguments: index,
+    ).then((_) {
+      setState(() {});
+    });
   }
 
   void _confirmDelete(int index) {

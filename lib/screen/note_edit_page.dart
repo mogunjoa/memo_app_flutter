@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:memo_app/providers.dart';
 
 import '../data/note.dart';
+import '../providers.dart';
 
 class NoteEditPage extends StatefulWidget {
-  const NoteEditPage({Key? key, int? index}) : super(key: key);
+  const NoteEditPage({Key? key, this.id}) : super(key: key);
+
   static const routeName = '/edit';
+
+  final int? id;
 
   @override
   State<NoteEditPage> createState() => _NoteEditPageState();
@@ -18,10 +21,26 @@ class _NoteEditPageState extends State<NoteEditPage> {
   Color memoColor = Note.colorDefault;
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final noteId = widget.id;
+    if (noteId != null) {
+      noteManager().getNote(noteId).then((note) {
+        titleController.text = note.title;
+        bodyController.text = note.body;
+        setState(() {
+          memoColor = note.color;
+        });
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('노트 편집'),
+        title: const Text('딘등오의 노트 편집'),
         backgroundColor: Colors.blue,
         actions: [
           IconButton(
@@ -59,7 +78,7 @@ class _NoteEditPageState extends State<NoteEditPage> {
                   height: 8,
                 ),
                 TextField(
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     border: InputBorder.none,
                     hintText: '내용 입력',
                   ),
@@ -82,44 +101,44 @@ class _NoteEditPageState extends State<NoteEditPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('배경색 선택'),
+          title: const Text('배경색 선택'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: Text('없음'),
+                title: const Text('없음'),
                 onTap: () => _applyColor(Note.colorDefault),
               ),
               ListTile(
-                leading: CircleAvatar(
+                leading: const CircleAvatar(
                   backgroundColor: Note.colorRed,
                 ),
                 title: Text('빨간색'),
                 onTap: () => _applyColor(Note.colorRed),
               ),
               ListTile(
-                leading: CircleAvatar(
+                leading: const CircleAvatar(
                   backgroundColor: Note.colorLime,
                 ),
                 title: Text('연두색'),
                 onTap: () => _applyColor(Note.colorLime),
               ),
               ListTile(
-                leading: CircleAvatar(
+                leading: const CircleAvatar(
                   backgroundColor: Note.colorBlue,
                 ),
                 title: Text('파란색'),
                 onTap: () => _applyColor(Note.colorBlue),
               ),
               ListTile(
-                leading: CircleAvatar(
+                leading: const CircleAvatar(
                   backgroundColor: Note.colorOrange,
                 ),
                 title: Text('주황색'),
                 onTap: () => _applyColor(Note.colorOrange),
               ),
               ListTile(
-                leading: CircleAvatar(
+                leading: const CircleAvatar(
                   backgroundColor: Note.colorYellow,
                 ),
                 title: Text('노란색'),
@@ -141,11 +160,17 @@ class _NoteEditPageState extends State<NoteEditPage> {
 
   void _saveNote() {
     if (bodyController.text.isNotEmpty) {
-      noteManager().addNote(Note(
+      final note = Note(
         bodyController.text,
         title: titleController.text,
         color: memoColor,
-      ));
+      );
+      final noteIndex = widget.id;
+      if (noteIndex != null) {
+        noteManager().updateNote(noteIndex, note);
+      } else {
+        noteManager().addNote(note);
+      }
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
