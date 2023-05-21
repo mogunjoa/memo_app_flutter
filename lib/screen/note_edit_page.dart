@@ -4,9 +4,8 @@ import 'package:memo_app/providers.dart';
 import '../data/note.dart';
 
 class NoteEditPage extends StatefulWidget {
-  const NoteEditPage({Key? key, this.index}) : super(key: key);
-  static const routeName = "/edit";
-  final int? index;
+  const NoteEditPage({Key? key, int? index}) : super(key: key);
+  static const routeName = '/edit';
 
   @override
   State<NoteEditPage> createState() => _NoteEditPageState();
@@ -14,41 +13,27 @@ class NoteEditPage extends StatefulWidget {
 
 class _NoteEditPageState extends State<NoteEditPage> {
   final TextEditingController titleController = TextEditingController();
-  final TextEditingController contentController = TextEditingController();
+  final TextEditingController bodyController = TextEditingController();
+
   Color memoColor = Note.colorDefault;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final note = Note(
-      contentController.text,
-      title: titleController.text,
-      color: memoColor,
-    );
-
-    final noteIndex = widget.index;
-    if(noteIndex != null) {
-      noteManager().updateNote(noteIndex, note);
-    } else {
-      noteManager().addNote(note);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: memoColor,
-        title: Text("딘등오의 메모작성"),
+        title: const Text('노트 편집'),
+        backgroundColor: Colors.blue,
         actions: [
           IconButton(
-              tooltip: '배경색 선택',
-              onPressed: () => {_displayColorSelectionDialog()},
-              icon: const Icon(Icons.color_lens)),
-          IconButton(onPressed: () => {
-            _saveNote()
-          }, icon: const Icon(Icons.save))
+            onPressed: _displayColorSelectionDialog,
+            icon: const Icon(Icons.color_lens),
+            tooltip: '배경색 선택',
+          ),
+          IconButton(
+            onPressed: _saveNote,
+            icon: const Icon(Icons.save),
+            tooltip: '저장',
+          ),
         ],
       ),
       body: SizedBox.expand(
@@ -60,29 +45,28 @@ class _NoteEditPageState extends State<NoteEditPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  controller: titleController,
-                  maxLines: 1,
                   decoration: const InputDecoration(
-                      label: Text(
-                        '제목 입력',
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                      border: OutlineInputBorder(
-                        gapPadding: 5,
-                      )),
+                    border: OutlineInputBorder(),
+                    label: Text('제목 입력'),
+                  ),
+                  maxLines: 1,
+                  style: const TextStyle(
+                    fontSize: 20,
+                  ),
+                  controller: titleController,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 8,
                 ),
                 TextField(
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: '내용 입력',
+                  ),
                   maxLines: null,
                   keyboardType: TextInputType.multiline,
-                  controller: contentController,
-                  decoration: const InputDecoration(
-                      border: InputBorder.none, hintText: '내용입력'),
-                )
+                  controller: bodyController,
+                ),
               ],
             ),
           ),
@@ -92,13 +76,13 @@ class _NoteEditPageState extends State<NoteEditPage> {
   }
 
   void _displayColorSelectionDialog() {
-    FocusManager.instance.primaryFocus?.unfocus();
+    FocusManager.instance.primaryFocus!.unfocus();
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('배경색 선택'),
+          title: Text('배경색 선택'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -156,9 +140,12 @@ class _NoteEditPageState extends State<NoteEditPage> {
   }
 
   void _saveNote() {
-    if (contentController.text.isNotEmpty) {
-      noteManager().addNote(Note(contentController.text,
-          title: titleController.text, color: memoColor));
+    if (bodyController.text.isNotEmpty) {
+      noteManager().addNote(Note(
+        bodyController.text,
+        title: titleController.text,
+        color: memoColor,
+      ));
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
